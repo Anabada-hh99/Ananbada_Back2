@@ -19,7 +19,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    Optional<Member> member = memberRepository.findByNickname(username);
+    Optional<Member> member = memberRepository.findByLoginName(username);
     return member
         .map(UserDetailsImpl::new)
         .orElseThrow(() -> new UsernameNotFoundException("nickname not found"));

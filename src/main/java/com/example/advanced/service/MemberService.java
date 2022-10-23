@@ -4,7 +4,6 @@ import com.example.advanced.controller.handler.CustomError;
 import com.example.advanced.controller.request.LoginRequestDto;
 import com.example.advanced.controller.request.MemberRequestDto;
 import com.example.advanced.controller.request.TokenDto;
-import com.example.advanced.controller.response.MemberResponseDto;
 import com.example.advanced.controller.response.ResponseDto;
 import com.example.advanced.domain.Member;
 import com.example.advanced.domain.RefreshToken;
@@ -15,12 +14,9 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,13 +35,15 @@ public class MemberService {
   public ResponseDto<?> createMember(MemberRequestDto requestDto) {
 
     //DB에 중복 아이디 있는지 확인
-    if (memberRepository.existsByLoginName(requestDto.getLoginName())){
+    if (memberRepository.existsByLoginName(requestDto.getLoginName()))
+    {
       return ResponseDto.fail(CustomError.ALREADY_SAVED_LOGINNAME.name(),
                               CustomError.ALREADY_SAVED_LOGINNAME.getMessage());
     }
 
     //DB에 중복 닉네임 있는지 확인
-    if (memberRepository.existsBynickname(requestDto.getNickname())){
+    if (memberRepository.existsBynickname(requestDto.getNickname()))
+    {
       return ResponseDto.fail(CustomError.ALERADY_SAVED_NICKNAME.name(),
                               CustomError.ALERADY_SAVED_NICKNAME.getMessage());
     }
@@ -102,7 +100,7 @@ public class MemberService {
                               CustomError.INVALID_MEMBER.getMessage());
     }
 
-    Authentication authentication = tokenProvider.getAuthentication(request.getHeader("Access_Token"));
+    Authentication authentication = tokenProvider.getAuthentication(request.getHeader("Authorization"));
     Member member = ((UserDetailsImpl) authentication.getPrincipal()).getMember();
     RefreshToken refreshToken = tokenProvider.isPresentRefreshToken(member);
 
@@ -139,14 +137,17 @@ public class MemberService {
   }
 
   @Transactional(readOnly = true)
-  public Member isPresentMember(String nickname) {
-    Optional<Member> optionalMember = memberRepository.findByNickname(nickname);
+  public Member isPresentMember(String loginName) {
+    Optional<Member> optionalMember = memberRepository.findByLoginName(loginName);
     return optionalMember.orElse(null);
   }
 
+
+
+
   @Transactional
   public void tokenToHeaders(TokenDto tokenDto, HttpServletResponse response) {
-    response.addHeader("Access_Token", "Bearer " + tokenDto.getAccessToken());
+    response.addHeader("Authorization", "Bearer " + tokenDto.getAccessToken());
     response.addHeader("Refresh_Token", tokenDto.getRefreshToken());
     response.addHeader("Access_Token_Expire_Time", tokenDto.getAccessTokenExpiresIn().toString());
   }
