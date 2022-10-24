@@ -12,8 +12,10 @@ import io.swagger.annotations.ApiImplicitParams;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+//@RequestMapping("/api")
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/api")
 public class MemberController {
 
   private final MemberService memberService;
@@ -46,7 +48,7 @@ public class MemberController {
           )
   })
 
-  @PostMapping(value = "/api/members/reissue")
+  @PostMapping(value = "/members/reissue")
   public ResponseDto<?> reissue(HttpServletRequest request, HttpServletResponse response) {
     return memberService.reissue(request, response);
   }
