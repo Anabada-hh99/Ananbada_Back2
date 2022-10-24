@@ -27,6 +27,8 @@ public class SecurityConfiguration {
   private final TokenProvider tokenProvider;
   private final AuthenticationEntryPointException authenticationEntryPointException;
   private final AccessDeniedHandlerException accessDeniedHandlerException;
+  private final CorsConfig corsConfig;
+
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -67,6 +69,7 @@ public class SecurityConfiguration {
         .anyRequest().authenticated()
 
         .and()
+            .addFilter(corsConfig.corsFilter())
         .apply(new JwtSecurityConfiguration(tokenProvider));
 
     return http.build();
