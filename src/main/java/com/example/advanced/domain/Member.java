@@ -54,8 +54,6 @@ public class Member extends Timestamped {
   )
   private List<Comment> comments = new ArrayList<>();
 
-
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -4,6 +4,7 @@ import com.example.advanced.controller.handler.CustomError;
 import com.example.advanced.controller.request.LoginRequestDto;
 import com.example.advanced.controller.request.MemberRequestDto;
 import com.example.advanced.controller.request.TokenDto;
+import com.example.advanced.controller.response.MemberResponseDto;
 import com.example.advanced.controller.response.ResponseDto;
 import com.example.advanced.domain.Member;
 import com.example.advanced.domain.RefreshToken;
@@ -14,9 +15,12 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,15 +39,13 @@ public class MemberService {
   public ResponseDto<?> createMember(MemberRequestDto requestDto) {
 
     //DB에 중복 아이디 있는지 확인
-    if (memberRepository.existsByLoginName(requestDto.getLoginName()))
-    {
+    if (memberRepository.existsByLoginName(requestDto.getLoginName())){
       return ResponseDto.fail(CustomError.ALREADY_SAVED_LOGINNAME.name(),
                               CustomError.ALREADY_SAVED_LOGINNAME.getMessage());
     }
 
     //DB에 중복 닉네임 있는지 확인
-    if (memberRepository.existsBynickname(requestDto.getNickname()))
-    {
+    if (memberRepository.existsBynickname(requestDto.getNickname())){
       return ResponseDto.fail(CustomError.ALERADY_SAVED_NICKNAME.name(),
                               CustomError.ALERADY_SAVED_NICKNAME.getMessage());
     }
@@ -95,17 +97,17 @@ public class MemberService {
   public ResponseDto<?> reissue(HttpServletRequest request,
                                 HttpServletResponse response) {
 
-    if (!tokenProvider.validateToken(request.getHeader("refresh_token"))) {
+    if (!tokenProvider.validateToken(request.getHeader("Refresh_Token"))) {
       return ResponseDto.fail(CustomError.INVALID_TOKEN.name(),
                               CustomError.INVALID_MEMBER.getMessage());
     }
 
-    Authentication authentication = tokenProvider.getAuthentication(request.getHeader("access_token"));
+    Authentication authentication = tokenProvider.getAuthentication(request.getHeader("Access_Token"));
     Member member = ((UserDetailsImpl) authentication.getPrincipal()).getMember();
     RefreshToken refreshToken = tokenProvider.isPresentRefreshToken(member);
 
 
-    if (!refreshToken.getValue().equals(request.getHeader("refresh_token"))) {
+    if (!refreshToken.getValue().equals(request.getHeader("Refresh_Token"))) {
       return ResponseDto.fail(CustomError.INVALID_TOKEN.name(),
                               CustomError.INVALID_TOKEN.getMessage());
     }
@@ -119,7 +121,7 @@ public class MemberService {
 
   @Transactional  //logout
   public ResponseDto<?> logout(HttpServletRequest request) {
-    if (!tokenProvider.validateToken(request.getHeader("refresh_token"))) {
+    if (!tokenProvider.validateToken(request.getHeader("Refresh_Token"))) {
       return ResponseDto.fail(CustomError.INVALID_TOKEN.name(),
                               CustomError.INVALID_MEMBER.getMessage());
     }
@@ -137,17 +139,15 @@ public class MemberService {
   }
 
   @Transactional(readOnly = true)
-  public Member isPresentMember(String loginName) {
-    Optional<Member> optionalMember = memberRepository.findByLoginName(loginName);
+  public Member isPresentMember(String username) {
+    Optional<Member> optionalMember = memberRepository.findByLoginName(username);
     return optionalMember.orElse(null);
   }
 
-
-
   @Transactional
   public void tokenToHeaders(TokenDto tokenDto, HttpServletResponse response) {
-    response.addHeader("access_token", "Bearer " + tokenDto.getAccessToken());
-    response.addHeader("refresh_token", tokenDto.getRefreshToken());
+    response.addHeader("Access_Token", "Bearer " + tokenDto.getAccessToken());
+    response.addHeader("Refresh_Token", tokenDto.getRefreshToken());
     response.addHeader("Access_Token_Expire_Time", tokenDto.getAccessTokenExpiresIn().toString());
   }
 
