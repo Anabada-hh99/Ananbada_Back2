@@ -161,6 +161,7 @@ public class PostService {
 //                       .commentResponseDtoList(commentResponseDtoList)
                         .state(post.getState())
                         .modifiedAt(post.getModifiedAt())
+                        .member(post.getMember())
                         .build()
         );
     }
@@ -176,7 +177,7 @@ public class PostService {
         if (post.validateMember(member)) {
             return ResponseDto.fail(CustomError.WRITER_NOT_MATCHED.name(),
                     CustomError.WRITER_NOT_MATCHED.getMessage());
-        }정
+        }
 
 
 

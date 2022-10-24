@@ -1,5 +1,6 @@
 package com.example.advanced.controller.response;
 
+import com.example.advanced.domain.Member;
 import com.example.advanced.domain.PostCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,5 +24,6 @@ public class PostResponseDto {
     private PostCategory category;
     private Boolean state;
     private LocalDateTime modifiedAt;
+    private Member member;
 
 }
