@@ -36,6 +36,22 @@ public class PostService {
     public ResponseDto<?> createPost(PostRequestDto postRequestDto, HttpServletRequest request) {
         Member member = validateMember(request);
 
+        if (null == member) {
+            return ResponseDto.fail(CustomError.INVALID_TOKEN.name(),
+                    CustomError.INVALID_TOKEN.getMessage());
+        }
+
+        if (null == request.getHeader("Refresh_Token")) {
+            return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
+                    CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
+        }
+
+        if (null == request.getHeader("Access_Token")) {
+            return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
+                    CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
+        }
+
+
         Post post = Post.builder()
                 .title(postRequestDto.getTitle())
                 .content(postRequestDto.getContent())
@@ -60,8 +76,19 @@ public class PostService {
         Member member = validateMember(request);
 
         if (post.validateMember(member)) {
-            return ResponseDto.fail(CustomError.WRITER_NOT_MATCHED_UPDATE.name(),
-                    CustomError.WRITER_NOT_MATCHED_UPDATE.getMessage());
+            return ResponseDto.fail(CustomError.WRITER_NOT_MATCHED.name(),
+                    CustomError.WRITER_NOT_MATCHED.getMessage());
+        }
+
+
+        if (null == request.getHeader("Refresh_Token")) {
+            return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
+                    CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
+        }
+
+        if (null == request.getHeader("Access_Token")) {
+            return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
+                    CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
 
         post.update(postRequestDto);
@@ -77,8 +104,19 @@ public class PostService {
         Member member = validateMember(request);
 
         if (post.validateMember(member)) {
-            return ResponseDto.fail(CustomError.WRITER_NOT_MATCHED_DELETE.name(),
-                    CustomError.WRITER_NOT_MATCHED_DELETE.getMessage());
+            return ResponseDto.fail(CustomError.WRITER_NOT_MATCHED.name(),
+                    CustomError.WRITER_NOT_MATCHED.getMessage());
+        }
+
+
+        if (null == request.getHeader("Refresh_Token")) {
+            return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
+                    CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
+        }
+
+        if (null == request.getHeader("Access_Token")) {
+            return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
+                    CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
 
         postRepository.delete(post);
@@ -127,12 +165,22 @@ public class PostService {
         );
     }
 
-    //재고상태 수정
-    @Transactional(readOnly = true)
-    public ResponseDto<?> checkStock(Long postId, Boolean state) {
+    //물품판매상태 수정
+    @Transactional
+    public ResponseDto<?> checkStock(Long postId, PostRequestDto postRequestDto,HttpServletRequest request) {
+
+        Member member = validateMember(request);
+
         Post post = isPresentPost(postId);
 
-        post.updateState(state);
+        if (post.validateMember(member)) {
+            return ResponseDto.fail(CustomError.WRITER_NOT_MATCHED.name(),
+                    CustomError.WRITER_NOT_MATCHED.getMessage());
+        }정
+
+
+
+        post.updateState(postRequestDto.getState());
 
         return ResponseDto.success(true);
 
@@ -165,17 +213,14 @@ public class PostService {
 
     // 카테고리 별로 게시글 조회하기
     @Transactional
-    public ResponseDto<?> getPostsByCategory(String category, Pageable pageable) {
-
+    public ResponseDto<?> getPostsByCategory(Pageable pageable,PostRequestDto postRequestDto) {
 
 
         Page<Post> postList = postRepository.findAll(pageable);
         List<PostResponseDto> postResponseDtoList = new ArrayList<>();
 
-        PostCategory categoryEnum = PostCategory.valueOf(category);
-
         for (Post post : postList) {
-            if (post.getCategory().equals(categoryEnum)) {
+            if (postRequestDto.getCategory().equals(post.getCategory())) {
                 postResponseDtoList.add(PostResponseDto.builder()
                         .id(post.getPostId())
                         .nickname(post.getMember().getNickname())

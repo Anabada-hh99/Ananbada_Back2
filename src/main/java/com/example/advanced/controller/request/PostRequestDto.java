@@ -14,4 +14,6 @@ public class PostRequestDto {
   private long price;
   private String imgUrl;
   private PostCategory category;
+  private Boolean state;
+
 }

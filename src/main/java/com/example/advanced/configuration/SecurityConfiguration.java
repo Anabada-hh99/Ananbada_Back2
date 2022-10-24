@@ -53,7 +53,7 @@ public class SecurityConfiguration {
         .antMatchers("/members/signin").permitAll()
         .antMatchers("/members/signup").permitAll()
         .antMatchers("/api/members/reissue").permitAll()
-        .antMatchers("/api/post/*").permitAll()
+//        .antMatchers("/api/post").permitAll()
 //        .antMatchers("/api/comment/*").permitAll()
         .antMatchers( "/v2/api-docs",
                 "/swagger-resources",

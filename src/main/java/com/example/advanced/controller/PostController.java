@@ -46,10 +46,10 @@ public class PostController {
         return postService.getPost(postId);
     }
 
-    //재고상태 수정
-    @GetMapping(value = "/api/post/{postId}?stock={state}")
-    public ResponseDto<?> checkStock(@PathVariable Long postId,@PathVariable Boolean state) {
-        return postService.checkStock(postId,state);
+    //물품판매상태 수정
+    @PutMapping(path = "/api/post/{postId}/state")
+    public ResponseDto<?> checkStock(@PathVariable Long postId,@RequestBody PostRequestDto postRequestDto,HttpServletRequest request) {
+        return postService.checkStock(postId,postRequestDto,request);
     }
 
 
@@ -63,10 +63,10 @@ public class PostController {
 
 
 
-    // 카테고리 별로 게시글 조회하기
-    @GetMapping(value = "/api/post?category={category}")
-    public ResponseDto<?> getPostsByCategory(@RequestParam String category,@PageableDefault(page = 0, size = 8, sort = "modifiedAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return postService.getPostsByCategory(category,pageable);
+    // 카테고리 별 게시글 조회
+    @GetMapping(value = "/api/post/category")
+    public ResponseDto<?> getPostsByCategory(@PageableDefault(page = 0, size = 8, sort = "modifiedAt", direction = Sort.Direction.DESC) Pageable pageable,@RequestBody PostRequestDto postRequestDto) {
+        return postService.getPostsByCategory(pageable,postRequestDto);
     }
 
 
