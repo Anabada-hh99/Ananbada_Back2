@@ -24,6 +24,6 @@ public class PostResponseDto {
     private PostCategory category;
     private Boolean state;
     private LocalDateTime modifiedAt;
-    private Member member;
+    private Long memberId;
 
 }

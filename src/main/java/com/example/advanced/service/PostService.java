@@ -10,6 +10,7 @@ import com.example.advanced.domain.Post;
 import com.example.advanced.jwt.TokenProvider;
 import com.example.advanced.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -59,6 +60,7 @@ public class PostService {
                 .imageUrl(postRequestDto.getImgUrl())
                 .category(postRequestDto.getCategory())
                 .state(true)
+                .count(0)
                 .member(member)
                 .build();
         postRepository.save(post);
@@ -124,7 +126,7 @@ public class PostService {
 
     //게시글 상세조회
 
-    @Transactional(readOnly = true)
+    @Transactional
     public ResponseDto<?> getPost(Long postId) {
         Post post = isPresentPost(postId);
         if (null == post) {
@@ -160,7 +162,7 @@ public class PostService {
 //                       .commentResponseDtoList(commentResponseDtoList)
                         .state(post.getState())
                         .modifiedAt(post.getModifiedAt())
-                        .member(post.getMember())
+                        .memberId(post.getMember().getMemberId())
                         .build()
         );
     }

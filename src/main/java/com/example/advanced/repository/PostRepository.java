@@ -13,7 +13,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
   List<Post> findAllByOrderByModifiedAtDesc();
   List<Post> findByCategory(PostCategory category);
   @Modifying
-  @Query("update Post p set p.count = p.count + 1 where p.postId = :id")    int updateView(Long postId);
+  @Query("update Post p set p.count = p.count + 1 where p.postId = :postId")    int updateView(Long postId);
 
 
 

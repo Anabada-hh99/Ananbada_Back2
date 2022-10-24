@@ -67,11 +67,6 @@ public class PostController {
         return postService.getPostsByCategory(pageable,isSaled,category);
     }
 
-    //조횟수 top4 게시글 조회
-    @GetMapping(value = "/api/post/popular")
-    public ResponseDto<?> getPostsByPopular() {
-        return postService.getPostsByPopular();
-    }
 
 
 
