@@ -7,7 +7,6 @@ import com.example.advanced.controller.response.PostResponseDto;
 import com.example.advanced.controller.response.ResponseDto;
 import com.example.advanced.domain.Member;
 import com.example.advanced.domain.Post;
-import com.example.advanced.domain.PostCategory;
 import com.example.advanced.jwt.TokenProvider;
 import com.example.advanced.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
+
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -30,6 +29,7 @@ public class PostService {
 //    private final CommentRepository commentRepository;
 
     private final TokenProvider tokenProvider;
+
 
     //게시글작성
     @Transactional
@@ -59,7 +59,6 @@ public class PostService {
                 .imageUrl(postRequestDto.getImgUrl())
                 .category(postRequestDto.getCategory())
                 .state(true)
-                .count(0)
                 .member(member)
                 .build();
         postRepository.save(post);
@@ -126,8 +125,8 @@ public class PostService {
     //게시글 상세조회
 
     @Transactional(readOnly = true)
-    public ResponseDto<?> getPost(Long id) {
-        Post post = isPresentPost(id);
+    public ResponseDto<?> getPost(Long postId) {
+        Post post = isPresentPost(postId);
         if (null == post) {
             return ResponseDto.fail(CustomError.POST_NOT_FOUND.name(),
                     CustomError.POST_NOT_FOUND.getMessage());
@@ -157,7 +156,7 @@ public class PostService {
                         .imageUrl(post.getImageUrl())
                         .count(post.getCount())
                         .category(post.getCategory())
-                        .count(post.getCount()+1)
+                        .count(updateView(postId))
 //                       .commentResponseDtoList(commentResponseDtoList)
                         .state(post.getState())
                         .modifiedAt(post.getModifiedAt())
@@ -166,9 +165,16 @@ public class PostService {
         );
     }
 
+    //조횟수 증가
+    @Transactional
+    public int updateView(Long postId) {
+        return postRepository.updateView(postId);
+    }
+
+
     //물품판매상태 수정
     @Transactional
-    public ResponseDto<?> checkStock(Long postId, PostRequestDto postRequestDto,HttpServletRequest request) {
+    public ResponseDto<?> checkStock(Long postId, PostRequestDto postRequestDto, HttpServletRequest request) {
 
         Member member = validateMember(request);
 
@@ -180,7 +186,6 @@ public class PostService {
         }
 
 
-
         post.updateState(postRequestDto.getState());
 
         return ResponseDto.success(true);
@@ -189,39 +194,27 @@ public class PostService {
     //게시글 전체 조회
 
     @Transactional(readOnly = true)
-    public ResponseDto<?> getAllPost(Pageable pageable) {
+    public ResponseDto<?> getAllPost(Pageable pageable, Boolean isSaled) {
 
         // 매개 변수로 pagable을 넘기면 return형은 Page형이다.
         Page<Post> postList = postRepository.findAll(pageable);
 
         List<PostResponseDto> postResponseDtoList = new ArrayList<>();
         for (Post post : postList) {
-            postResponseDtoList.add(PostResponseDto.builder()
-                    .id(post.getPostId())
-                    .nickname(post.getMember().getNickname())
-                    .title(post.getTitle())
-                    .content(post.getContent())
-                    .imageUrl(post.getImageUrl())
-                    .count(post.getCount())
-                    .category(post.getCategory())
-                    .state(post.getState())
-                    .modifiedAt(post.getModifiedAt())
-                    .build()
-            );
-        }
-        return ResponseDto.success(postResponseDtoList);
-    }
-
-    // 카테고리 별로 게시글 조회하기
-    @Transactional
-    public ResponseDto<?> getPostsByCategory(Pageable pageable,PostRequestDto postRequestDto) {
-
-
-        Page<Post> postList = postRepository.findAll(pageable);
-        List<PostResponseDto> postResponseDtoList = new ArrayList<>();
-
-        for (Post post : postList) {
-            if (postRequestDto.getCategory().equals(post.getCategory())) {
+            if (isSaled.equals(post.getState())) {
+                postResponseDtoList.add(PostResponseDto.builder()
+                        .id(post.getPostId())
+                        .nickname(post.getMember().getNickname())
+                        .title(post.getTitle())
+                        .content(post.getContent())
+                        .imageUrl(post.getImageUrl())
+                        .count(post.getCount())
+                        .category(post.getCategory())
+                        .state(post.getState())
+                        .modifiedAt(post.getModifiedAt())
+                        .build()
+                );
+            } else {
                 postResponseDtoList.add(PostResponseDto.builder()
                         .id(post.getPostId())
                         .nickname(post.getMember().getNickname())
@@ -238,6 +231,53 @@ public class PostService {
         }
         return ResponseDto.success(postResponseDtoList);
     }
+
+    // 카테고리 별로 게시글 조회하기
+    @Transactional
+    public ResponseDto<?> getPostsByCategory(Pageable pageable, Boolean isSaled, String category) {
+
+
+        Page<Post> postList = postRepository.findAll(pageable);
+        List<PostResponseDto> postResponseDtoList = new ArrayList<>();
+
+
+        for (Post post : postList) {
+            if (category.equals(post.getCategory())) {
+                if (isSaled.equals(post.getState())) {
+                    postResponseDtoList.add(PostResponseDto.builder()
+                            .id(post.getPostId())
+                            .nickname(post.getMember().getNickname())
+                            .title(post.getTitle())
+                            .content(post.getContent())
+                            .imageUrl(post.getImageUrl())
+                            .count(post.getCount())
+                            .category(post.getCategory())
+                            .state(post.getState())
+                            .modifiedAt(post.getModifiedAt())
+                            .build()
+                    );
+
+                } else {
+                    postResponseDtoList.add(PostResponseDto.builder()
+                            .id(post.getPostId())
+                            .nickname(post.getMember().getNickname())
+                            .title(post.getTitle())
+                            .content(post.getContent())
+                            .imageUrl(post.getImageUrl())
+                            .count(post.getCount())
+                            .category(post.getCategory())
+                            .state(post.getState())
+                            .modifiedAt(post.getModifiedAt())
+                            .build()
+                    );
+
+                }
+
+            }
+        }
+        return ResponseDto.success(postResponseDtoList);
+    }
+
 
 
     @Transactional(readOnly = true)

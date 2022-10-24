@@ -34,7 +34,7 @@ public class Post extends Timestamped{
     private String imageUrl;
 
     //조회 수
-    @Column(nullable = false)
+    @Column(columnDefinition = "integer default 0",nullable = false)
     private Integer count;
 
 

@@ -1,5 +1,6 @@
 package com.example.advanced.controller.request;
 
+import com.example.advanced.domain.Member;
 import com.example.advanced.domain.PostCategory;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,5 +16,6 @@ public class PostRequestDto {
   private String imgUrl;
   private PostCategory category;
   private Boolean state;
+
 
 }
