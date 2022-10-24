@@ -11,8 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MemberResponseDto {
-  private Long id;
+  private Long memberId;
+  private String loginName;
   private String nickname;
+  private String phoneNumber;
   private LocalDateTime createdAt;
   private LocalDateTime modifiedAt;
 }
