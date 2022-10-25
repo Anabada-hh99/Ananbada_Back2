@@ -1,5 +1,6 @@
 package com.example.advanced.jwt;
 
+import com.example.advanced.controller.handler.CustomError;
 import com.example.advanced.controller.request.TokenDto;
 import com.example.advanced.controller.response.ResponseDto;
 import com.example.advanced.domain.Member;
@@ -7,6 +8,7 @@ import com.example.advanced.domain.RefreshToken;
 import com.example.advanced.domain.UserDetailsImpl;
 import com.example.advanced.repository.RefreshTokenRepository;
 import com.example.advanced.service.UserDetailsServiceImpl;
+import com.example.advanced.shared.Authority;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -23,6 +25,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,7 +38,7 @@ public class TokenProvider {
 
   private static final String AUTHORITIES_KEY = "auth";
   private static final String BEARER_TYPE = "bearer";
-  private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30;            //30분
+  private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 1;            //30분
   private static final long REFRESH_TOKEN_EXPRIRE_TIME = 1000 * 60 * 60 * 24 * 7;     //7일
 
   private final Key key;
@@ -44,6 +47,9 @@ public class TokenProvider {
   @Autowired
   private final UserDetailsServiceImpl userDetailsService;
 
+  //@Autowired
+  //private final TokenProvider tokenProvider;
+
   public TokenProvider(@Value("${jwt.secret}") String secretKey,
       RefreshTokenRepository refreshTokenRepository, UserDetailsServiceImpl userDetailsService) {
     this.refreshTokenRepository = refreshTokenRepository;
@@ -51,6 +57,8 @@ public class TokenProvider {
     byte[] keyBytes = Decoders.BASE64.decode(secretKey);
     this.key = Keys.hmacShaKeyFor(keyBytes);
   }
+
+
 
   public TokenDto generateTokenDto(Authentication authentication) {
     String authorities = authentication.getAuthorities().stream()
@@ -68,6 +76,8 @@ public class TokenProvider {
         .compact();
 
     String refreshToken = Jwts.builder()
+        //.setSubject(authentication.getName())
+        .claim(AUTHORITIES_KEY, authorities)
         .setExpiration(new Date(now + REFRESH_TOKEN_EXPRIRE_TIME))
         .signWith(key, SignatureAlgorithm.HS256)
         .compact();
@@ -90,6 +100,43 @@ public class TokenProvider {
         .build();
 
   }
+
+  //Refresh_Token 으로 Access_Token 재발급
+    @Transactional
+    public TokenDto generateTokenDto(Member member){
+
+
+        long now = (new Date().getTime());
+
+        Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+        String accessToken = Jwts.builder()
+                .setSubject(member.getLoginName())
+                .claim(AUTHORITIES_KEY, Authority.ROLE_MEMBER)
+                .setExpiration(accessTokenExpiresIn)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+        String refreshToken = Jwts.builder()
+                .setExpiration(new Date(now + REFRESH_TOKEN_EXPRIRE_TIME))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+        RefreshToken refreshTokenObject = RefreshToken.builder()
+                .id(member.getMemberId())
+                .member(member)
+                .value(refreshToken)
+                .build();
+
+        refreshTokenRepository.save(refreshTokenObject);
+
+        return TokenDto.builder()
+                .grantType(BEARER_TYPE)
+                .accessToken(accessToken)
+                .accessTokenExpiresIn(accessTokenExpiresIn.getTime())
+                .refreshToken(refreshToken)
+                .build();
+    }
+
 
   public Authentication getAuthentication(String accessToken) {
     Claims claims = parseClaims(accessToken);
@@ -151,7 +198,8 @@ public class TokenProvider {
   public ResponseDto<?> deleteRefreshToken(Member member) {
     RefreshToken refreshToken = isPresentRefreshToken(member);
     if (null == refreshToken) {
-      return ResponseDto.fail("TOKEN_NOT_FOUND", "refresh token not found");
+      return ResponseDto.fail(CustomError.INVALID_TOKEN.name(),
+                              CustomError.INVALID_TOKEN.getMessage());
     }
 
     refreshTokenRepository.delete(refreshToken);
