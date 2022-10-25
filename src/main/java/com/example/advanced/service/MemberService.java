@@ -131,7 +131,7 @@ public class MemberService {
     TokenDto tokenDto = tokenProvider.generateTokenDto(member);
     refreshToken.updateValue(tokenDto.getRefreshToken());
     tokenToHeaders(tokenDto, response);
-    return ResponseDto.success("success");
+    return ResponseDto.success(member);
 
 
     //FE side => Access-Token(x) Refresh-Token(o) => Access, Refresh 발급
