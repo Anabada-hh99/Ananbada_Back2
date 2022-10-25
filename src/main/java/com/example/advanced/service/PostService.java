@@ -286,6 +286,35 @@ public class PostService {
         return ResponseDto.success(postResponseDtoList);
     }
 
+    //조회수TOP4 게시글 조회
+    @Transactional
+    public ResponseDto<?> getPostsByCount(Pageable pageable) {
+
+        Page<Post> postList = postRepository.findAll(pageable);
+
+        List<PostResponseDto> postResponseDtoList = new ArrayList<>();
+
+        for (Post post : postList) {
+                    postResponseDtoList.add(PostResponseDto.builder()
+                            .id(post.getPostId())
+                            .nickname(post.getMember().getNickname())
+                            .title(post.getTitle())
+                            .content(post.getContent())
+                            .imageUrl(post.getImageUrl())
+                            .count(post.getCount())
+                            .category(post.getCategory())
+                            .state(post.getState())
+                            .modifiedAt(post.getModifiedAt())
+                            .memberId(post.getMember().getMemberId())
+                            .build()
+                    );
+
+                }
+
+
+
+        return ResponseDto.success(postResponseDtoList);
+    }
 
 
     @Transactional(readOnly = true)
