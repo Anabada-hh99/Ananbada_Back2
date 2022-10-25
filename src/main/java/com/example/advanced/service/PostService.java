@@ -241,14 +241,15 @@ public class PostService {
     @Transactional
     public ResponseDto<?> getPostsByCategory(Pageable pageable, Boolean isSaled, String category) {
 
-
-        Page<Post> postList = postRepository.findAll(pageable);
-        List<PostResponseDto> postResponseDtoList = new ArrayList<>();
         PostCategory categoryEnum = PostCategory.valueOf(category);
+        Page<Post> postList = postRepository.findByCategory(categoryEnum,pageable);
+
+
+        List<PostResponseDto> postResponseDtoList = new ArrayList<>();
+
 
 
         for (Post post : postList) {
-            if (categoryEnum.equals(post.getCategory())) {
                 if (isSaled&&post.getState()) {
                     postResponseDtoList.add(PostResponseDto.builder()
                             .id(post.getPostId())
@@ -282,7 +283,7 @@ public class PostService {
                 }
             }
 
-        }
+
         return ResponseDto.success(postResponseDtoList);
     }
 
