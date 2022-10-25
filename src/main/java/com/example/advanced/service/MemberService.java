@@ -14,13 +14,13 @@ import com.example.advanced.repository.MemberRepository;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.example.advanced.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,17 +35,20 @@ public class MemberService {
   private final AuthenticationManagerBuilder authenticationManagerBuilder;
   private final TokenProvider tokenProvider;
 
+  private final RefreshTokenRepository refreshTokenRepository;
+
   @Transactional  //회원가입
   public ResponseDto<?> createMember(MemberRequestDto requestDto) {
 
     //DB에 중복 아이디 있는지 확인
-    if (memberRepository.existsByLoginName(requestDto.getLoginName())){
+    if (memberRepository.existsByLoginName(requestDto.getLoginName())) {
       return ResponseDto.fail(CustomError.ALREADY_SAVED_LOGINNAME.name(),
                               CustomError.ALREADY_SAVED_LOGINNAME.getMessage());
     }
 
     //DB에 중복 닉네임 있는지 확인
-    if (memberRepository.existsBynickname(requestDto.getNickname())){
+    if (memberRepository.existsBynickname(requestDto.getNickname()))
+    {
       return ResponseDto.fail(CustomError.ALERADY_SAVED_NICKNAME.name(),
                               CustomError.ALERADY_SAVED_NICKNAME.getMessage());
     }
@@ -89,7 +92,15 @@ public class MemberService {
     tokenToHeaders(tokenDto, response);
 
     return ResponseDto.success(
-        null
+        //null
+            MemberResponseDto.builder()
+                    .memberId(member.getMemberId())
+                    .loginName(member.getLoginName())
+                    .nickname(member.getNickname())
+                    .phoneNumber(member.getPhoneNumber())
+                    .createdAt(member.getCreatedAt())
+                    .modifiedAt(member.getModifiedAt())
+                    .build()
     );
   }
 
@@ -97,33 +108,78 @@ public class MemberService {
   public ResponseDto<?> reissue(HttpServletRequest request,
                                 HttpServletResponse response) {
 
-    if (!tokenProvider.validateToken(request.getHeader("Refresh_Token"))) {
-      return ResponseDto.fail(CustomError.INVALID_TOKEN.name(),
-                              CustomError.INVALID_MEMBER.getMessage());
-    }
 
-    Authentication authentication = tokenProvider.getAuthentication(request.getHeader("Access_Token"));
-    Member member = ((UserDetailsImpl) authentication.getPrincipal()).getMember();
-    RefreshToken refreshToken = tokenProvider.isPresentRefreshToken(member);
-
-
-    if (!refreshToken.getValue().equals(request.getHeader("Refresh_Token"))) {
+    //Validity of Refresh-Token not proven => INVALID_TOKEN
+    if (!tokenProvider.validateToken(request.getHeader("refresh_token"))) {
       return ResponseDto.fail(CustomError.INVALID_TOKEN.name(),
                               CustomError.INVALID_TOKEN.getMessage());
     }
 
-    TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
+
+    Member member = refreshTokenRepository.findByValue(request.getHeader("refresh_token"))
+        .map(RefreshToken::getMember)
+        .orElseThrow(() -> new IllegalArgumentException("RefreshToken not found"));
+
+    RefreshToken refreshToken = tokenProvider.isPresentRefreshToken(member);
+
+
+    if (!refreshToken.getValue().equals(request.getHeader("refresh_token"))) {
+      return ResponseDto.fail(CustomError.INVALID_TOKEN.name(), CustomError.INVALID_TOKEN.getMessage());
+    }
+
+
+    TokenDto tokenDto = tokenProvider.generateTokenDto(member);
     refreshToken.updateValue(tokenDto.getRefreshToken());
     tokenToHeaders(tokenDto, response);
-    return ResponseDto.success("success");
+    return ResponseDto.success(member);
+
+
+    //FE side => Access-Token(x) Refresh-Token(o) => Access, Refresh 발급
+    //Access-Token validate 하지 않으면 INVALID_TOKEN => Refresh
+      //UsernamePasswordAuthenticationToken authenticationToken =
+      //        new UsernamePasswordAuthenticationToken(member.getLoginName(), member.getPassword());
+      //Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+
+      //여기까지 오면 이미 SecurityContextHolder에 Authentication이 있는데 Authentication 만들면 똑같은 정보 같은 애를 또 만드는 거 아닌가?
+//      if (SecurityContextHolder.getContext().getAuthentication() == authentication){
+//        //TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
+//        TokenDto tokenDto = tokenProvider.generateTokenDtoByMember(member);
+//        refreshToken.updateValue(tokenDto.getRefreshToken());
+//        tokenToHeaders(tokenDto, response);
+//      }
+
+
+
+//      if (!refreshToken.getValue().equals(request.getHeader("Refresh_token"))) {
+//        return ResponseDto.fail(CustomError.INVALID_MEMBER.name(),
+//                CustomError.INVALID_TOKEN.getMessage());
+//      }
+
+//      TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
+//      refreshToken.updateValue(tokenDto.getRefreshToken());
+//      tokenToHeaders(tokenDto, response);
+
+    //return ResponseDto.success("success");
+//
+//
+//
+//    if (!refreshToken.getValue().equals(request.getHeader("refresh_token"))) {
+//      return ResponseDto.fail(CustomError.INVALID_MEMBER.name(),
+//                              CustomError.INVALID_TOKEN.getMessage());
+//    }
+//
+//    TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
+//    refreshToken.updateValue(tokenDto.getRefreshToken());
+//    tokenToHeaders(tokenDto, response);
+//    return ResponseDto.success("success");
   }
 
 
   @Transactional  //logout
   public ResponseDto<?> logout(HttpServletRequest request) {
-    if (!tokenProvider.validateToken(request.getHeader("Refresh_Token"))) {
+    if (!tokenProvider.validateToken(request.getHeader("refresh_token"))) {
       return ResponseDto.fail(CustomError.INVALID_TOKEN.name(),
-                              CustomError.INVALID_MEMBER.getMessage());
+                              CustomError.INVALID_TOKEN.getMessage());
     }
 
     //Authentication에 있는 member 찾기
@@ -139,15 +195,17 @@ public class MemberService {
   }
 
   @Transactional(readOnly = true)
-  public Member isPresentMember(String username) {
-    Optional<Member> optionalMember = memberRepository.findByLoginName(username);
+  public Member isPresentMember(String loginName) {
+    Optional<Member> optionalMember = memberRepository.findByLoginName(loginName);
     return optionalMember.orElse(null);
   }
 
+
+
   @Transactional
   public void tokenToHeaders(TokenDto tokenDto, HttpServletResponse response) {
-    response.addHeader("Access_Token", "Bearer " + tokenDto.getAccessToken());
-    response.addHeader("Refresh_Token", tokenDto.getRefreshToken());
+    response.addHeader("access_token", "Bearer " + tokenDto.getAccessToken());
+    response.addHeader("refresh_token", tokenDto.getRefreshToken());
     response.addHeader("Access_Token_Expire_Time", tokenDto.getAccessTokenExpiresIn().toString());
   }
 

@@ -23,14 +23,32 @@ public class JwtFilter extends OncePerRequestFilter {
       throws IOException, ServletException {
 
     String jwt = resolveToken(request);
+  //  String refreshjwt = resolveRefreshToken(request);
 
+    //Michin 이거 때문인가?
     if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
       Authentication authentication = tokenProvider.getAuthentication(jwt);
       SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
+//    if (StringUtils.hasText(refreshjwt) && tokenProvider.validateToken(refreshjwt) && (!StringUtils.hasText(jwt))){
+//      //get Authentication에서 왜 계속 권한 정보 없다고 떠? 아오
+//      Authentication refreshAuthentication = tokenProvider.getAuthentication(refreshjwt);
+//      SecurityContextHolder.getContext().get
+//    }
+
     filterChain.doFilter(request, response);
   }
+
+//  private String resolveRefreshToken(HttpServletRequest request) {
+//    String refreshToken = request.getHeader("refresh_token");
+//    if (StringUtils.hasText(refreshToken)){
+//      System.out.println();
+//      return refreshToken;
+//    }
+//    return null;
+//  }
+
   private String resolveToken(HttpServletRequest request) {
     String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
     if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
