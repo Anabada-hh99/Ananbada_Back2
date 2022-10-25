@@ -1,11 +1,7 @@
 package com.example.advanced.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,4 +28,5 @@ public class RefreshToken extends Timestamped {
   public void updateValue(String token) {
     this.value = token;
   }
+
 }
