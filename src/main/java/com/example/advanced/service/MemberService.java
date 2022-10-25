@@ -4,6 +4,7 @@ import com.example.advanced.controller.handler.CustomError;
 import com.example.advanced.controller.request.LoginRequestDto;
 import com.example.advanced.controller.request.MemberRequestDto;
 import com.example.advanced.controller.request.TokenDto;
+import com.example.advanced.controller.response.MemberResponseDto;
 import com.example.advanced.controller.response.ResponseDto;
 import com.example.advanced.domain.Member;
 import com.example.advanced.domain.RefreshToken;
@@ -91,7 +92,15 @@ public class MemberService {
     tokenToHeaders(tokenDto, response);
 
     return ResponseDto.success(
-        null
+        //null
+            MemberResponseDto.builder()
+                    .memberId(member.getMemberId())
+                    .loginName(member.getLoginName())
+                    .nickname(member.getNickname())
+                    .phoneNumber(member.getPhoneNumber())
+                    .createdAt(member.getCreatedAt())
+                    .modifiedAt(member.getModifiedAt())
+                    .build()
     );
   }
 
