@@ -14,7 +14,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
-  public static final String AUTHORIZATION_HEADER = "access_token";
+  public static final String AUTHORIZATION_HEADER = "Access_Token";
   public static final String BEARER_PREFIX = "Bearer ";
 
   private final TokenProvider tokenProvider;
@@ -52,7 +52,6 @@ public class JwtFilter extends OncePerRequestFilter {
   private String resolveToken(HttpServletRequest request) {
     String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
     if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
-      System.out.println();
       return bearerToken.substring(7);
     }
     return null;

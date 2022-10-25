@@ -1,11 +1,9 @@
 package com.example.advanced.domain;
 
+import com.example.advanced.controller.request.PostRequestDto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -17,6 +15,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Post extends Timestamped{
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,8 +34,17 @@ public class Post extends Timestamped{
     private String imageUrl;
 
     //조회 수
+    @Column(columnDefinition = "integer default 0",nullable = false)
+    private Integer count;
+
+
+    @Convert(converter = PostCategoryConverter.class)
+    private PostCategory category;
+
+    //판매상태
     @Column(nullable = false)
-    private int count;
+    private Boolean state;
+
 
     @JsonManagedReference
     @OneToMany(mappedBy = "post",
@@ -48,5 +56,21 @@ public class Post extends Timestamped{
     @ManyToOne
     @JoinColumn(name="member_Id", nullable = false)
     private Member member;
+
+    public void update(PostRequestDto postRequestDto) {
+        this.title = postRequestDto.getTitle();
+        this.content = postRequestDto.getContent();
+        this.price = postRequestDto.getPrice();
+        this.imageUrl = postRequestDto.getImgUrl();
+        this.category = postRequestDto.getCategory();
+    }
+
+    public void updateState(boolean state) {
+        this.state = state;
+    }
+
+    public boolean validateMember(Member member) {
+        return !this.member.equals(member);
+    }
 
 }
