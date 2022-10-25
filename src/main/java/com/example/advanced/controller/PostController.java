@@ -55,7 +55,8 @@ public class PostController {
     //게시글 전체 조회
     @GetMapping(value = "/api/post")
     // @Pagable을 통해 보여줄 페이시 위치(0이 시작), 한 페이지에 게시글 개수(8), 정렬 기준(createdAt), 정렬 기준의 순서(내림차순)을 정의
-    public ResponseDto<?> getAllPosts(@PageableDefault(page = 0, size = 8, sort = "modifiedAt", direction = Sort.Direction.DESC) Pageable pageable,@RequestParam Boolean isSaled) {
+    public ResponseDto<?> getAllPosts(@PageableDefault(page = 0, size = 8, sort = "modifiedAt", direction = Sort.Direction.DESC) Pageable pageable,
+                                      @RequestParam Boolean isSaled) {
         return postService.getAllPost(pageable,isSaled);
     }
 
@@ -63,7 +64,8 @@ public class PostController {
 
     // 카테고리 별 게시글 조회
     @GetMapping(value = "/api/post/c")
-    public ResponseDto<?> getPostsByCategory(@PageableDefault(page = 0, size = 8, sort = "modifiedAt", direction = Sort.Direction.DESC) Pageable pageable,@RequestParam Boolean isSaled,@RequestParam String category) {
+    public ResponseDto<?> getPostsByCategory(@PageableDefault(page = 0, size = 8, sort = "modifiedAt", direction = Sort.Direction.DESC) Pageable pageable,
+                                             @RequestParam Boolean isSaled,@RequestParam String category) {
         return postService.getPostsByCategory(pageable,isSaled,category);
     }
 

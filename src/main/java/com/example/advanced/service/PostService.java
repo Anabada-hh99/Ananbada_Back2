@@ -7,6 +7,7 @@ import com.example.advanced.controller.response.PostResponseDto;
 import com.example.advanced.controller.response.ResponseDto;
 import com.example.advanced.domain.Member;
 import com.example.advanced.domain.Post;
+import com.example.advanced.domain.PostCategory;
 import com.example.advanced.jwt.TokenProvider;
 import com.example.advanced.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -203,7 +204,7 @@ public class PostService {
 
         List<PostResponseDto> postResponseDtoList = new ArrayList<>();
         for (Post post : postList) {
-            if (isSaled.equals(post.getState())) {
+            if (isSaled&&post.getState()) {
                 postResponseDtoList.add(PostResponseDto.builder()
                         .id(post.getPostId())
                         .nickname(post.getMember().getNickname())
@@ -216,7 +217,7 @@ public class PostService {
                         .modifiedAt(post.getModifiedAt())
                         .build()
                 );
-            } else {
+            } else if(!isSaled){
                 postResponseDtoList.add(PostResponseDto.builder()
                         .id(post.getPostId())
                         .nickname(post.getMember().getNickname())
@@ -241,11 +242,12 @@ public class PostService {
 
         Page<Post> postList = postRepository.findAll(pageable);
         List<PostResponseDto> postResponseDtoList = new ArrayList<>();
+        PostCategory categoryEnum = PostCategory.valueOf(category);
 
 
         for (Post post : postList) {
-            if (category.equals(post.getCategory())) {
-                if (isSaled.equals(post.getState())) {
+            if (categoryEnum.equals(post.getCategory())) {
+                if (isSaled&&post.getState()) {
                     postResponseDtoList.add(PostResponseDto.builder()
                             .id(post.getPostId())
                             .nickname(post.getMember().getNickname())
@@ -259,7 +261,7 @@ public class PostService {
                             .build()
                     );
 
-                } else {
+                } else if(!isSaled) {
                     postResponseDtoList.add(PostResponseDto.builder()
                             .id(post.getPostId())
                             .nickname(post.getMember().getNickname())
@@ -274,8 +276,8 @@ public class PostService {
                     );
 
                 }
-
             }
+
         }
         return ResponseDto.success(postResponseDtoList);
     }
