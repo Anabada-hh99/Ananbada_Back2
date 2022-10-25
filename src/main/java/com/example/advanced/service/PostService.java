@@ -215,6 +215,7 @@ public class PostService {
                         .category(post.getCategory())
                         .state(post.getState())
                         .modifiedAt(post.getModifiedAt())
+                        .memberId(post.getMember().getMemberId())
                         .build()
                 );
             } else if(!isSaled){
@@ -228,6 +229,7 @@ public class PostService {
                         .category(post.getCategory())
                         .state(post.getState())
                         .modifiedAt(post.getModifiedAt())
+                        .memberId(post.getMember().getMemberId())
                         .build()
                 );
             }
@@ -258,6 +260,7 @@ public class PostService {
                             .category(post.getCategory())
                             .state(post.getState())
                             .modifiedAt(post.getModifiedAt())
+                            .memberId(post.getMember().getMemberId())
                             .build()
                     );
 
@@ -272,6 +275,7 @@ public class PostService {
                             .category(post.getCategory())
                             .state(post.getState())
                             .modifiedAt(post.getModifiedAt())
+                            .memberId(post.getMember().getMemberId())
                             .build()
                     );
 
