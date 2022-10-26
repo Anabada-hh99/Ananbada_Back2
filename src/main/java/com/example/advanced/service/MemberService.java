@@ -110,9 +110,7 @@ public class MemberService {
   public ResponseDto<?> reissue(HttpServletRequest request,
                                 HttpServletResponse response) {
 
-    System.out.println(request.getHeader("refresh_token"));
-    System.out.println("------------------------------------------------------------------------------------------------");
-    log.info("----------------------------------------------------------------log");
+
     //Validity of Refresh-Token not proven => INVALID_TOKEN
     if (!tokenProvider.validateToken(request.getHeader("refresh_token"))) {
       return ResponseDto.fail(CustomError.INVALID_TOKEN.name(),

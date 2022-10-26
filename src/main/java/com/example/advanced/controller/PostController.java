@@ -37,9 +37,6 @@ public class PostController {
     //게시글 삭제
     @DeleteMapping(value = "/api/post/{postId}")
     public ResponseDto<?> deletePost(@PathVariable Long postId,HttpServletRequest request) {
-        System.out.println(request.getHeader("refresh_token"));
-        System.out.println("------------------------------------------------------------------------------------------------");
-        log.info("----------------------------------------------------------------log");
         return postService.deletePost(postId,request);
     }
 

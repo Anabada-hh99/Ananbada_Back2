@@ -2,7 +2,6 @@ package com.example.advanced.service;
 
 import com.example.advanced.controller.handler.CustomError;
 import com.example.advanced.controller.request.CommentRequestDto;
-import com.example.advanced.controller.request.PostRequestDto;
 import com.example.advanced.controller.response.CommentResponseDto;
 import com.example.advanced.controller.response.ResponseDto;
 import com.example.advanced.domain.Comment;
@@ -70,6 +69,16 @@ public class CommentService {
                     CustomError.INVALID_TOKEN.getMessage());
         }
 
+        if (null == request.getHeader("refresh_token")) {
+            return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
+                    CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
+        }
+
+        if (null == request.getHeader("Authorization")) {
+            return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
+                    CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
+        }
+
         Post post = postService.isPresentPost(commentRequestDto.getPostId());
         if (null == post) {
             return ResponseDto.fail(CustomError.POST_NOT_FOUND.name(),
@@ -84,7 +93,16 @@ public class CommentService {
 
         commentRepository.save(comment);
 
-        return ResponseDto.success(null);
+        CommentResponseDto commentResponseDto = CommentResponseDto.builder()
+                .commentId(comment.getCommentId())
+                .content(comment.getContent())
+                .memberId(comment.getMember().getMemberId())
+                .postId(comment.getPost().getPostId())
+                .createdAt(comment.getCreatedAt())
+                .modifiedAt(comment.getModifiedAt())
+                .build();
+
+        return ResponseDto.success(commentResponseDto);
 
     }
 
@@ -96,6 +114,16 @@ public class CommentService {
         if (null == member) {
             return ResponseDto.fail(CustomError.INVALID_TOKEN.name(),
                     CustomError.INVALID_TOKEN.getMessage());
+        }
+
+        if (null == request.getHeader("refresh_token")) {
+            return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
+                    CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
+        }
+
+        if (null == request.getHeader("Authorization")) {
+            return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
+                    CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
 
         Post post = postService.isPresentPost(commentRequestDto.getPostId());
@@ -124,9 +152,20 @@ public class CommentService {
     @Transactional
     public ResponseDto<?> deleteComment(Long commentId, HttpServletRequest request) {
         Member member = validateMember(request);
+
         if (null == member) {
             return ResponseDto.fail(CustomError.INVALID_TOKEN.name(),
                     CustomError.INVALID_TOKEN.getMessage());
+        }
+
+        if (null == request.getHeader("refresh_token")) {
+            return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
+                    CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
+        }
+
+        if (null == request.getHeader("Authorization")) {
+            return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
+                    CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
 
         Comment comment = isPresentComment(commentId);
@@ -154,7 +193,7 @@ public class CommentService {
 
     @Transactional
     public Member validateMember(HttpServletRequest request) {
-        if (!tokenProvider.validateToken(request.getHeader("Refresh_Token"))) {
+        if (!tokenProvider.validateToken(request.getHeader("refresh_token"))) {
             return null;
         }
         return tokenProvider.getMemberFromAuthentication();

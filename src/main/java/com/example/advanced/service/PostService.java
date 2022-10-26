@@ -60,14 +60,29 @@ public class PostService {
                 .title(postRequestDto.getTitle())
                 .content(postRequestDto.getContent())
                 .price(postRequestDto.getPrice())
-                .imageUrl(postRequestDto.getImgUrl())
+                .imageUrl(postRequestDto.getImageUrl())
                 .category(postRequestDto.getCategory())
                 .state(true)
                 .count(0)
                 .member(member)
                 .build();
         postRepository.save(post);
-        return ResponseDto.success(true);
+
+        PostResponseDto postResponseDto = PostResponseDto.builder()
+                .id(post.getPostId())
+                .nickname(post.getMember().getNickname())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .price(post.getPrice())
+                .imageUrl(post.getImageUrl())
+                .count(post.getCount())
+                .category(post.getCategory())
+                .state(post.getState())
+                .modifiedAt(post.getModifiedAt())
+                .memberId(post.getMember().getMemberId())
+                .build();
+
+        return ResponseDto.success(postResponseDto);
 
     }
 
@@ -102,10 +117,6 @@ public class PostService {
     //게시글 삭제
     @Transactional
     public ResponseDto<?> deletePost(Long postId, HttpServletRequest request) {
-
-        System.out.println(request.getHeader("refresh_token"));
-        System.out.println("------------------------------------------------------------------------------------------------");
-        log.info("----------------------------------------------------------------log");
 
         Post post = isPresentPost(postId);
 
@@ -164,9 +175,9 @@ public class PostService {
                         .content(post.getContent())
                         .price(post.getPrice())
                         .imageUrl(post.getImageUrl())
-                        .count(post.getCount())
                         .category(post.getCategory())
                         .count(updateView(postId))
+                        .count(post.getCount())
 //                       .commentResponseDtoList(commentResponseDtoList)
                         .state(post.getState())
                         .modifiedAt(post.getModifiedAt())

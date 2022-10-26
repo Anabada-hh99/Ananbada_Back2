@@ -39,7 +39,6 @@ public class SecurityConfiguration {
     @Bean
     @Order(SecurityProperties.BASIC_AUTH_ORDER)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        System.out.println("시큐리티 시작----------------------------------------------------------------------------");
         http.cors();
 
         http.csrf().disable()
@@ -56,7 +55,7 @@ public class SecurityConfiguration {
                 .authorizeRequests()
                 .antMatchers("/api/members/signin").permitAll()
                 .antMatchers("/api/members/signup").permitAll()
-                //.antMatchers("/api/members/reissue").permitAll()
+                .antMatchers("/api/members/reissue").permitAll()
                 .antMatchers("/api/post").permitAll()
                 .antMatchers(HttpMethod.GET,"/api/post/{postId}").permitAll()
                 .antMatchers("/api/post/c").permitAll()
@@ -78,7 +77,7 @@ public class SecurityConfiguration {
                 .addFilter(corsConfig.corsFilter())
                 .apply(new JwtSecurityConfiguration(tokenProvider));
 
-        System.out.println("시큐리티 끝----------------------------------------------------------------------------");
+
         return http.build();
     }
 }
