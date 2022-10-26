@@ -11,6 +11,7 @@ import com.example.advanced.domain.PostCategory;
 import com.example.advanced.jwt.TokenProvider;
 import com.example.advanced.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PostService {
 
     private final PostRepository postRepository;
@@ -43,12 +45,12 @@ public class PostService {
                     CustomError.INVALID_TOKEN.getMessage());
         }
 
-        if (null == request.getHeader("Refresh_Token")) {
+        if (null == request.getHeader("refresh_token")) {
             return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
                     CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
 
-        if (null == request.getHeader("Access_Token")) {
+        if (null == request.getHeader("Authorization")) {
             return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
                     CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
@@ -83,12 +85,12 @@ public class PostService {
         }
 
 
-        if (null == request.getHeader("Refresh_Token")) {
+        if (null == request.getHeader("refresh_token")) {
             return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
                     CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
 
-        if (null == request.getHeader("Access_Token")) {
+        if (null == request.getHeader("Authorization")) {
             return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
                     CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
@@ -101,6 +103,10 @@ public class PostService {
     @Transactional
     public ResponseDto<?> deletePost(Long postId, HttpServletRequest request) {
 
+        System.out.println(request.getHeader("refresh_token"));
+        System.out.println("------------------------------------------------------------------------------------------------");
+        log.info("----------------------------------------------------------------log");
+
         Post post = isPresentPost(postId);
 
         Member member = validateMember(request);
@@ -111,12 +117,12 @@ public class PostService {
         }
 
 
-        if (null == request.getHeader("Refresh_Token")) {
+        if (null == request.getHeader("refresh_token")) {
             return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
                     CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
 
-        if (null == request.getHeader("Access_Token")) {
+        if (null == request.getHeader("Authorization")) {
             return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
                     CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
@@ -156,6 +162,7 @@ public class PostService {
                         .nickname(post.getMember().getNickname())
                         .title(post.getTitle())
                         .content(post.getContent())
+                        .price(post.getPrice())
                         .imageUrl(post.getImageUrl())
                         .count(post.getCount())
                         .category(post.getCategory())
@@ -210,6 +217,7 @@ public class PostService {
                         .nickname(post.getMember().getNickname())
                         .title(post.getTitle())
                         .content(post.getContent())
+                        .price(post.getPrice())
                         .imageUrl(post.getImageUrl())
                         .count(post.getCount())
                         .category(post.getCategory())
@@ -224,6 +232,7 @@ public class PostService {
                         .nickname(post.getMember().getNickname())
                         .title(post.getTitle())
                         .content(post.getContent())
+                        .price(post.getPrice())
                         .imageUrl(post.getImageUrl())
                         .count(post.getCount())
                         .category(post.getCategory())
@@ -256,6 +265,7 @@ public class PostService {
                             .nickname(post.getMember().getNickname())
                             .title(post.getTitle())
                             .content(post.getContent())
+                            .price(post.getPrice())
                             .imageUrl(post.getImageUrl())
                             .count(post.getCount())
                             .category(post.getCategory())
@@ -271,6 +281,7 @@ public class PostService {
                             .nickname(post.getMember().getNickname())
                             .title(post.getTitle())
                             .content(post.getContent())
+                            .price(post.getPrice())
                             .imageUrl(post.getImageUrl())
                             .count(post.getCount())
                             .category(post.getCategory())
@@ -301,6 +312,7 @@ public class PostService {
                             .nickname(post.getMember().getNickname())
                             .title(post.getTitle())
                             .content(post.getContent())
+                            .price(post.getPrice())
                             .imageUrl(post.getImageUrl())
                             .count(post.getCount())
                             .category(post.getCategory())
@@ -326,7 +338,7 @@ public class PostService {
 
     @Transactional
     public Member validateMember(HttpServletRequest request) {
-        if (!tokenProvider.validateToken(request.getHeader("Refresh_Token"))) {
+        if (!tokenProvider.validateToken(request.getHeader("refresh_token"))) {
             return null;
         }
         return tokenProvider.getMemberFromAuthentication();

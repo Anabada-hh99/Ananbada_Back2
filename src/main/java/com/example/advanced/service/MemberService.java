@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.example.advanced.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class MemberService {
 
 
@@ -108,7 +110,9 @@ public class MemberService {
   public ResponseDto<?> reissue(HttpServletRequest request,
                                 HttpServletResponse response) {
 
-
+    System.out.println(request.getHeader("refresh_token"));
+    System.out.println("------------------------------------------------------------------------------------------------");
+    log.info("----------------------------------------------------------------log");
     //Validity of Refresh-Token not proven => INVALID_TOKEN
     if (!tokenProvider.validateToken(request.getHeader("refresh_token"))) {
       return ResponseDto.fail(CustomError.INVALID_TOKEN.name(),
@@ -204,7 +208,7 @@ public class MemberService {
 
   @Transactional
   public void tokenToHeaders(TokenDto tokenDto, HttpServletResponse response) {
-    response.addHeader("access_token", "Bearer " + tokenDto.getAccessToken());
+    response.addHeader("Authorization", "Bearer " + tokenDto.getAccessToken());
     response.addHeader("refresh_token", tokenDto.getRefreshToken());
     response.addHeader("Access_Token_Expire_Time", tokenDto.getAccessTokenExpiresIn().toString());
   }

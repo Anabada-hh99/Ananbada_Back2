@@ -1,10 +1,8 @@
 package com.example.advanced.domain;
+import com.example.advanced.controller.request.CommentRequestDto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -13,7 +11,8 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Comment {
+@Builder
+public class Comment extends Timestamped{
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long commentId;
@@ -31,5 +30,11 @@ public class Comment {
     @JoinColumn(name="post_Id", nullable = false)
     private Post post;
 
+    public boolean validateMember(Member member) {
+        return !this.member.equals(member);
+    }
 
+    public void update(CommentRequestDto commentRequestDto) {
+        this.content = commentRequestDto.getContent();
+    }
 }
