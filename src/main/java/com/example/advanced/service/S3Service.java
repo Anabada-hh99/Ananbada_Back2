@@ -3,12 +3,14 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import io.jsonwebtoken.io.IOException;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,11 +33,20 @@ public class S3Service {
     @Value("${aws.s3.secret.key}")
     private String secretKey;
 
-    @Value("$aws.s3.bucket.name")
+    @Value("${aws.s3.bucket.name}")
     private String bucket;
 
     @Value("${cloud.aws.region.static}")
     private String region;
+
+    @Bean
+    public AmazonS3Client amazonS3Client() {
+        BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey, secretKey);
+        return (AmazonS3Client) AmazonS3ClientBuilder.standard()
+                .withRegion(region)
+                .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+                .build();
+    }
 
     @PostConstruct
     public void setS3Client() {

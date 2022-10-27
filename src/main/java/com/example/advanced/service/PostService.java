@@ -61,6 +61,9 @@ public class PostService {
                     CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
         //이미지 업로드
+        if(null==multipartFile){
+            System.out.println("null");
+        }
 
         String imgPath = s3Service.upload(multipartFile);
         postRequestDto.setImageUrl(imgPath);

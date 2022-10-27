@@ -26,8 +26,8 @@ public class PostController {
 
 
     //게시글 작성
-    @PostMapping(value = "/api/post")
-    public ResponseDto<?> createPost(@RequestPart PostRequestDto postRequestDto,HttpServletRequest request, MultipartFile multipartFile) throws IOException {
+    @PostMapping(value = "/api/post",consumes = "multipart/form-data")
+    public ResponseDto<?> createPost(@RequestPart PostRequestDto postRequestDto,HttpServletRequest request, @RequestParam(name="file",required = false)MultipartFile multipartFile) throws IOException {
         return postService.createPost(postRequestDto,request,multipartFile);
     }
 
