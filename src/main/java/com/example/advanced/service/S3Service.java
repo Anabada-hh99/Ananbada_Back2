@@ -9,10 +9,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import io.jsonwebtoken.io.IOException;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -25,13 +22,13 @@ import javax.annotation.PostConstruct;
 public class S3Service {
     private AmazonS3 s3Client;
 
-    @Value("${aws.s3.access.key}")
+    @Value("${cloud.aws.s3.access.key}")
     private String accessKey;
 
-    @Value("${aws.s3.secret.key}")
+    @Value("${cloud.aws.s3.secret.key}")
     private String secretKey;
 
-    @Value("$aws.s3.bucket.name")
+    @Value("${cloud.aws.s3.bucket.name}")
     private String bucket;
 
     @Value("${cloud.aws.region.static}")
