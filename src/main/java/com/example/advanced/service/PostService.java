@@ -63,7 +63,7 @@ public class PostService {
         //이미지 업로드
 
         String imgPath = s3Service.upload(multipartFile);
-        postRequestDto.setImgUrl(imgPath);
+        postRequestDto.setImageUrl(imgPath);
 
 
         Post post = Post.builder()
