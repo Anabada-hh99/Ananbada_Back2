@@ -47,6 +47,7 @@ public class CommentService {
                     CommentResponseDto.builder()
                             .commentId(comment.getCommentId())
                             .content(comment.getContent())
+                            .nickname(comment.getMember().getNickname())
                             .memberId(comment.getMember().getMemberId())
                             .postId(comment.getPost().getPostId())
                             .createdAt(comment.getCreatedAt())

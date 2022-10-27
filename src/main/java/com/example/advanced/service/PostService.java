@@ -109,8 +109,9 @@ public class PostService {
             return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
                     CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
-
+        post.updateState(postRequestDto.getState());
         post.update(postRequestDto);
+
         return ResponseDto.success(true);
     }
 
