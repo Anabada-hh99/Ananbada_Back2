@@ -11,6 +11,7 @@ import com.example.advanced.domain.PostCategory;
 import com.example.advanced.jwt.TokenProvider;
 import com.example.advanced.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PostService {
 
     private final PostRepository postRepository;
@@ -43,12 +45,12 @@ public class PostService {
                     CustomError.INVALID_TOKEN.getMessage());
         }
 
-        if (null == request.getHeader("Refresh_Token")) {
+        if (null == request.getHeader("refresh_token")) {
             return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
                     CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
 
-        if (null == request.getHeader("Access_Token")) {
+        if (null == request.getHeader("Authorization")) {
             return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
                     CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
@@ -58,14 +60,29 @@ public class PostService {
                 .title(postRequestDto.getTitle())
                 .content(postRequestDto.getContent())
                 .price(postRequestDto.getPrice())
-                .imageUrl(postRequestDto.getImgUrl())
+                .imageUrl(postRequestDto.getImageUrl())
                 .category(postRequestDto.getCategory())
                 .state(true)
                 .count(0)
                 .member(member)
                 .build();
         postRepository.save(post);
-        return ResponseDto.success(true);
+
+        PostResponseDto postResponseDto = PostResponseDto.builder()
+                .id(post.getPostId())
+                .nickname(post.getMember().getNickname())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .price(post.getPrice())
+                .imageUrl(post.getImageUrl())
+                .count(post.getCount())
+                .category(post.getCategory())
+                .state(post.getState())
+                .modifiedAt(post.getModifiedAt())
+                .memberId(post.getMember().getMemberId())
+                .build();
+
+        return ResponseDto.success(postResponseDto);
 
     }
 
@@ -83,17 +100,18 @@ public class PostService {
         }
 
 
-        if (null == request.getHeader("Refresh_Token")) {
+        if (null == request.getHeader("refresh_token")) {
             return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
                     CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
 
-        if (null == request.getHeader("Access_Token")) {
+        if (null == request.getHeader("Authorization")) {
             return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
                     CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
-
+        post.updateState(postRequestDto.getState());
         post.update(postRequestDto);
+
         return ResponseDto.success(true);
     }
 
@@ -111,12 +129,12 @@ public class PostService {
         }
 
 
-        if (null == request.getHeader("Refresh_Token")) {
+        if (null == request.getHeader("refresh_token")) {
             return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
                     CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
 
-        if (null == request.getHeader("Access_Token")) {
+        if (null == request.getHeader("Authorization")) {
             return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
                     CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
@@ -156,10 +174,11 @@ public class PostService {
                         .nickname(post.getMember().getNickname())
                         .title(post.getTitle())
                         .content(post.getContent())
+                        .price(post.getPrice())
                         .imageUrl(post.getImageUrl())
-                        .count(post.getCount())
                         .category(post.getCategory())
                         .count(updateView(postId))
+                        .count(post.getCount())
 //                       .commentResponseDtoList(commentResponseDtoList)
                         .state(post.getState())
                         .modifiedAt(post.getModifiedAt())
@@ -210,6 +229,7 @@ public class PostService {
                         .nickname(post.getMember().getNickname())
                         .title(post.getTitle())
                         .content(post.getContent())
+                        .price(post.getPrice())
                         .imageUrl(post.getImageUrl())
                         .count(post.getCount())
                         .category(post.getCategory())
@@ -224,6 +244,7 @@ public class PostService {
                         .nickname(post.getMember().getNickname())
                         .title(post.getTitle())
                         .content(post.getContent())
+                        .price(post.getPrice())
                         .imageUrl(post.getImageUrl())
                         .count(post.getCount())
                         .category(post.getCategory())
@@ -256,6 +277,7 @@ public class PostService {
                             .nickname(post.getMember().getNickname())
                             .title(post.getTitle())
                             .content(post.getContent())
+                            .price(post.getPrice())
                             .imageUrl(post.getImageUrl())
                             .count(post.getCount())
                             .category(post.getCategory())
@@ -271,6 +293,7 @@ public class PostService {
                             .nickname(post.getMember().getNickname())
                             .title(post.getTitle())
                             .content(post.getContent())
+                            .price(post.getPrice())
                             .imageUrl(post.getImageUrl())
                             .count(post.getCount())
                             .category(post.getCategory())
@@ -301,6 +324,7 @@ public class PostService {
                             .nickname(post.getMember().getNickname())
                             .title(post.getTitle())
                             .content(post.getContent())
+                            .price(post.getPrice())
                             .imageUrl(post.getImageUrl())
                             .count(post.getCount())
                             .category(post.getCategory())
@@ -326,7 +350,7 @@ public class PostService {
 
     @Transactional
     public Member validateMember(HttpServletRequest request) {
-        if (!tokenProvider.validateToken(request.getHeader("Refresh_Token"))) {
+        if (!tokenProvider.validateToken(request.getHeader("refresh_token"))) {
             return null;
         }
         return tokenProvider.getMemberFromAuthentication();

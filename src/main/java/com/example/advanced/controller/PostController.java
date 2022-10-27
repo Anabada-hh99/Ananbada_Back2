@@ -5,6 +5,7 @@ import com.example.advanced.controller.request.PostRequestDto;
 import com.example.advanced.controller.response.ResponseDto;
 import com.example.advanced.service.PostService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @RequiredArgsConstructor
 @RestController
+@Slf4j
 public class PostController {
 
     private final PostService postService;
@@ -21,7 +23,7 @@ public class PostController {
 
 
     //게시글 작성
-    @PostMapping(value = "/api/post")
+    @PostMapping(value = "/api/post/create")
     public ResponseDto<?> createPost(@RequestBody PostRequestDto postRequestDto,HttpServletRequest request) {
         return postService.createPost(postRequestDto,request);
     }

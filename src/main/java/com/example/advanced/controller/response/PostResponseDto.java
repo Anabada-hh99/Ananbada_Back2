@@ -18,6 +18,7 @@ public class PostResponseDto {
     private String nickname;
     private String title;
     private String content;
+    private Long price;
     private String imageUrl;
 //    private List<CommentResponseDto> commentResponseDtoList;
     private Integer count;
