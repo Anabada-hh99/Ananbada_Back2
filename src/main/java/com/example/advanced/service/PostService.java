@@ -16,9 +16,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,12 +34,15 @@ public class PostService {
 //    private final CommentRepository commentRepository;
 
     private final TokenProvider tokenProvider;
+    private final S3Service s3Service;
+
 
 
     //게시글작성
     @Transactional
-    public ResponseDto<?> createPost(PostRequestDto postRequestDto, HttpServletRequest request) {
+    public ResponseDto<?> createPost(PostRequestDto postRequestDto, HttpServletRequest request,MultipartFile multipartFile) throws IOException {
         Member member = validateMember(request);
+
 
         if (null == member) {
             return ResponseDto.fail(CustomError.INVALID_TOKEN.name(),
@@ -52,6 +58,10 @@ public class PostService {
             return ResponseDto.fail(CustomError.LOGINMEMBER_NOT_FOUND.name(),
                     CustomError.LOGINMEMBER_NOT_FOUND.getMessage());
         }
+        //이미지 업로드
+
+        String imgPath = s3Service.upload(multipartFile);
+        postRequestDto.setImgUrl(imgPath);
 
 
         Post post = Post.builder()
