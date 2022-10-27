@@ -5,6 +5,7 @@ import com.example.advanced.controller.request.PostRequestDto;
 import com.example.advanced.controller.response.ResponseDto;
 import com.example.advanced.service.PostService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -17,6 +18,7 @@ import java.io.IOException;
 
 @RequiredArgsConstructor
 @RestController
+@Slf4j
 public class PostController {
 
     private final PostService postService;

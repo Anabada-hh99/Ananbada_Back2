@@ -61,7 +61,7 @@ public class Post extends Timestamped{
         this.title = postRequestDto.getTitle();
         this.content = postRequestDto.getContent();
         this.price = postRequestDto.getPrice();
-        this.imageUrl = postRequestDto.getImgUrl();
+        this.imageUrl = postRequestDto.getImageUrl();
         this.category = postRequestDto.getCategory();
     }
 

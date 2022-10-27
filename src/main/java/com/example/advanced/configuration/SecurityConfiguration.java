@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -56,8 +57,10 @@ public class SecurityConfiguration {
                 .antMatchers("/api/members/signup").permitAll()
                 .antMatchers("/api/members/reissue").permitAll()
                 .antMatchers("/api/post").permitAll()
+                .antMatchers(HttpMethod.GET,"/api/post/{postId}").permitAll()
                 .antMatchers("/api/post/c").permitAll()
                 .antMatchers("/api/post/p").permitAll()
+                .antMatchers(HttpMethod.GET,"/api/comments/{postId}").permitAll()
 //        .antMatchers("/api/comment/*").permitAll()
                 .antMatchers("/v2/api-docs",
                         "/swagger-resources",
@@ -73,6 +76,7 @@ public class SecurityConfiguration {
                 .and()
                 .addFilter(corsConfig.corsFilter())
                 .apply(new JwtSecurityConfiguration(tokenProvider));
+
 
         return http.build();
     }

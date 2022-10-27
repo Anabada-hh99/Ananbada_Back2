@@ -22,6 +22,7 @@ public enum CustomError {
     INVALID_TOKEN(404,"Token이 유효하지 않습니다."),
     POST_NOT_FOUND(404,"해당 게시글을 찾을 수 없습니다."),
     LOGINMEMBER_NOT_FOUND(404,"로그인이 필요합니다."),
+    COMMENT_NOT_FOUND(404, "해당 댓글을 찾을 수 없습니다."),
 
     //409 CONFLICT 중복된 리소스
     ALREADY_SAVED_LOGINNAME(409, "중복된 아이디입니다."),
