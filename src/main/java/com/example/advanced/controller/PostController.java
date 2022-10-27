@@ -67,7 +67,7 @@ public class PostController {
     }
 
     // 카테고리 별 게시글 조회
-    @GetMapping(value = "//post/c")
+    @GetMapping(value = "/post/c")
     public ResponseDto<?> getPostsByCategory(@PageableDefault(page = 0, size = 9, sort = "modifiedAt", direction = Sort.Direction.DESC) Pageable pageable,
                                              @RequestParam Boolean isSaled,@RequestParam String category) {
         return postService.getPostsByCategory(pageable,isSaled,category);
