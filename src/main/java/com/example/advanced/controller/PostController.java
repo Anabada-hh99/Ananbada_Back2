@@ -9,9 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
 @RequiredArgsConstructor
 @RestController
@@ -23,9 +26,9 @@ public class PostController {
 
 
     //게시글 작성
-    @PostMapping(value = "/api/post/create")
-    public ResponseDto<?> createPost(@RequestBody PostRequestDto postRequestDto,HttpServletRequest request) {
-        return postService.createPost(postRequestDto,request);
+    @PostMapping(value = "/api/post",consumes = "multipart/form-data")
+    public ResponseDto<?> createPost(@RequestPart PostRequestDto postRequestDto,HttpServletRequest request, @RequestParam(name="file",required = false)MultipartFile multipartFile) throws IOException {
+        return postService.createPost(postRequestDto,request,multipartFile);
     }
 
     //게시글 수정
